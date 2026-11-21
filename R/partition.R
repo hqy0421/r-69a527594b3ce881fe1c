@@ -105,11 +105,18 @@ partition_tibble <- function(.data, k, .bytes, .key = NULL) {
     optimal <- lo
 
     minseg <- partition_min_segments(
-      optimal, prefix, valid_pos, n
+      optimal,
+      prefix,
+      valid_pos,
+      n
     )
     reach <- attr(minseg, "reach")
     cuts <- partition_lex_cuts(
-      k, reach, valid_pos, minseg, n
+      k,
+      reach,
+      valid_pos,
+      minseg,
+      n
     )
   }
 
@@ -287,8 +294,7 @@ partition_lex_cuts <- function(k, reach, valid_pos, minseg, n) {
 
 check_partition_k <- function(k, n, call = caller_env()) {
   if (
-    !is.numeric(k) || length(k) != 1L || is.na(k) ||
-      k <= 0 || k != floor(k)
+    !is.numeric(k) || length(k) != 1L || is.na(k) || k <= 0 || k != floor(k)
   ) {
     tibble_abort(
       paste0(

@@ -16,7 +16,9 @@ brute2 <- function(bytes, valid, k) {
   if (k == 1L) {
     return(list(cuts = integer(), optimal = sum(bytes)))
   }
-  if (length(pos) < k - 1L) return(NULL)
+  if (length(pos) < k - 1L) {
+    return(NULL)
+  }
   prefix <- c(0, cumsum(as.numeric(bytes)))
   best <- NULL
   # utils::combn() misinterprets a scalar m as 1:m, build the matrix
@@ -31,7 +33,8 @@ brute2 <- function(bytes, valid, k) {
     bounds <- c(0L, cc, n)
     t <- max(diff(prefix[bounds + 1L]))
     if (
-      is.null(best) || t < best$optimal ||
+      is.null(best) ||
+        t < best$optimal ||
         (t == best$optimal && lex_less(cc, best$cuts))
     ) {
       best <- list(cuts = cc, optimal = t)
@@ -47,10 +50,17 @@ for (iter in 1:400) {
   bytes <- sample(1:9, n, replace = TRUE)
   keys_n <- sample(1:max(2L, n), 1L)
   key <- sample(letters[seq_len(keys_n)], n, replace = TRUE)
-  if (runif(1L) < 0.3) key[sample(seq_len(n), sample(seq_len(n), 1L))] <- NA_character_
+  if (runif(1L) < 0.3) {
+    key[sample(seq_len(n), sample(seq_len(n), 1L))] <- NA_character_
+  }
 
-  df <- tibble(key = key, bytes = bytes, x = seq_len(n),
-               f = factor(key), l = as.Date("2020-01-01") + seq_len(n))
+  df <- tibble(
+    key = key,
+    bytes = bytes,
+    x = seq_len(n),
+    f = factor(key),
+    l = as.Date("2020-01-01") + seq_len(n)
+  )
 
   for (k in 1:n) {
     # oracle on admissible cuts (NA treated as a regular key)
@@ -95,19 +105,26 @@ for (iter in 1:400) {
 
     # key integrity + type preservation + slices reconstruct input
     slices <- got$data
-    ok <- ok && all(vapply(slices, is_tibble, logical(1))) &&
+    ok <- ok &&
+      all(vapply(slices, is_tibble, logical(1))) &&
       identical(do.call(vctrs::vec_rbind, slices), df) &&
-      identical(vapply(slices, function(z) class(z$x[[1L]]), character(1))[1L],
-                "integer") &&
+      identical(
+        vapply(slices, function(z) class(z$x[[1L]]), character(1))[1L],
+        "integer"
+      ) &&
       is.factor(slices[[1L]]$f) &&
       inherits(slices[[1L]]$l, "Date")
 
     if (!ok) {
       cat("FAIL iter", iter, "n", n, "k", k, "\n")
-      cat(" key:"); print(key)
-      cat(" bytes:"); print(bytes)
-      cat(" oracle cuts:"); print(oracle$cuts)
-      cat(" got cuts:   "); print(cuts)
+      cat(" key:")
+      print(key)
+      cat(" bytes:")
+      print(bytes)
+      cat(" oracle cuts:")
+      print(oracle$cuts)
+      cat(" got cuts:   ")
+      print(cuts)
       cat(" oracle opt:", oracle$optimal, " got:", opt, "\n")
       fails <- fails + 1L
     }
@@ -128,7 +145,8 @@ for (iter in 1:200) {
     ) {
       cat("FAIL no-key iter", iter, "k", k, "\n")
       print(bytes)
-      print(oracle); print(attr(got, "cuts"))
+      print(oracle)
+      print(attr(got, "cuts"))
       fails <- fails + 1L
     }
   }
@@ -163,11 +181,14 @@ for (iter in 1:100) {
         !isTRUE(all.equal(attr(got, "optimal_bytes"), oracle$optimal))
     ) {
       cat("FAIL composite iter", iter, "k", k, "\n")
-      print(combo); print(oracle)
+      print(combo)
+      print(oracle)
       fails <- fails + 1L
     }
   }
 }
 
 cat("\nTotal failures:", fails, "\n")
-if (fails > 0L) quit(status = 1L)
+if (fails > 0L) {
+  quit(status = 1L)
+}

@@ -178,7 +178,9 @@ brute_partition <- function(bytes, valid, k) {
   if (k == 1L) {
     return(list(cuts = integer(), optimal = sum(as.numeric(bytes))))
   }
-  if (length(pos) < k - 1L) return(NULL)
+  if (length(pos) < k - 1L) {
+    return(NULL)
+  }
 
   prefix <- c(0, cumsum(as.numeric(bytes)))
   if (length(pos) == 1L) {
@@ -197,7 +199,8 @@ brute_partition <- function(bytes, valid, k) {
   for (cc in combos) {
     t <- max(diff(prefix[c(0L, cc, n) + 1L]))
     if (
-      is.null(best) || t < best$optimal ||
+      is.null(best) ||
+        t < best$optimal ||
         (t == best$optimal && lex_less(cc, best$cuts))
     ) {
       best <- list(cuts = cc, optimal = t)
