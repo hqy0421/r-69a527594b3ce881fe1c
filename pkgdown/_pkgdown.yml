@@ -41,6 +41,7 @@ reference:
   - subsetting
   - add_row
   - add_column
+  - partition_tibble
 
 - title: Helpers
   contents:
